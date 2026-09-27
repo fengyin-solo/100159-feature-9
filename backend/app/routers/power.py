@@ -12,22 +12,40 @@ router = APIRouter(prefix="/api/power", tags=["供电保障"])
 
 service = PowerService()
 
-LIST_FIELDS = ["供电编号", "所属站点", "供电方式", "蓄电池容量", "上次放电测试", "备电时长", "责任人员", "供电状态"]
+LIST_FIELDS = ["供电编号", "所属站点", "供电方式", "蓄电池容量", "上次放电测试", "备电时长", "责任人员", "最近巡检结论", "供电状态"]
 STATUSES = ["待巡检", "供电正常", "备电不足", "已断电"]
 
 
 @router.get("", response_model=PageResult[dict])
 def list_entries(
     keyword: str | None = Query(default=None, description="按供电编号检索"),
+    code: str | None = Query(default=None, alias="供电编号", description="按供电编号过滤"),
+    station: str | None = Query(default=None, alias="所属站点", description="按所属站点过滤"),
+    supply: str | None = Query(default=None, alias="供电方式", description="按供电方式过滤"),
     status: str | None = Query(default=None, description="待巡检、供电正常、备电不足、已断电"),
     page: int = 1,
     size: int = 20,
 ) -> PageResult[dict]:
-    """按供电编号与状态过滤供电保障列表；没有数据时返回空页，不报错。"""
+    """按供电编号、所属站点、供电方式与状态过滤；没有数据时返回空页，不报错。"""
     if size > 200:
         raise HTTPException(status_code=400, detail="每页最多 200 条，请缩小分页范围")
-    items, total = service.list_entries(keyword=keyword, status=status, page=page, size=size)
+    items, total = service.list_entries(
+        keyword=keyword, code=code, station=station, supply=supply, status=status, page=page, size=size
+    )
     return PageResult(items=items, total=total, page=page, size=size)
+
+
+@router.get("/summary")
+def summary() -> dict[str, Any]:
+    """列表统计：在册数量、备电不足数量、已断电数量，与列表派生状态同一口径。"""
+    return service.summary()
+
+
+@router.get("/export")
+def export_entries() -> dict[str, Any]:
+    """导出供电保障清单：返回当前过滤条件下的全量数据。"""
+    items, total = service.list_entries(page=1, size=10000)
+    return {"module": "power", "total": total, "items": items}
 
 
 @router.get("/{entry_id}", response_model=dict)
@@ -41,10 +59,12 @@ def get_entry(entry_id: int) -> dict:
 
 @router.post("", response_model=ActionResult)
 def create_entry(payload: EntryPayload) -> ActionResult:
-    """登记一条供电单元，缺字段时说明原因而不是静默丢弃。"""
-    entry, missing = service.create_entry(payload.values)
+    """登记供电单元：备电时长、供电方式等必填缺失时说明原因；供电编号重复时合并成一条。"""
+    entry, missing, merged = service.create_entry(payload.values)
     if missing:
-        return ActionResult(ok=False, message=f"缺少必填字段：{'、'.join(missing)}")
+        return ActionResult(ok=False, message=f"缺少必填字段：{'、'.join(missing)}，请补充后再保存")
+    if merged:
+        return ActionResult(ok=True, message="供电编号已存在，重复记录已合并为一条", entry=entry)
     return ActionResult(ok=True, message="供电单元已登记", entry=entry)
 
 
@@ -56,10 +76,3 @@ def run_action(entry_id: int, payload: EntryPayload) -> ActionResult:
     if entry is None:
         return ActionResult(ok=False, message=message)
     return ActionResult(ok=True, message=message, entry=entry)
-
-
-@router.get("/export")
-def export_entries() -> dict[str, Any]:
-    """导出供电保障清单：返回当前过滤条件下的全量数据。"""
-    items, total = service.list_entries(page=1, size=10000)
-    return {"module": "power", "total": total, "items": items}
