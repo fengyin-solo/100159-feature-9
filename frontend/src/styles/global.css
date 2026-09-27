@@ -33,3 +33,78 @@ body { margin: 0; background: #f6f8fb; color: #1f2937; }
 .link { border: none; background: none; color: var(--brand); cursor: pointer; padding: 0; }
 .page-foot { display: flex; justify-content: space-between; margin-top: 8px; font-size: 12px; color: var(--muted); }
 .error-text { color: #b42318; }
+.notice-text { color: #176b3a; }
+
+/* 供电保障：备电不足标记、错误重试条、登记弹窗与详情卡片 */
+.row-low { background: #fef3f2; }
+.row-low:hover { background: #fde8e6; }
+.backup-cell { display: inline-flex; align-items: center; gap: 6px; }
+.tag-low {
+  font-style: normal;
+  background: #fee4e2;
+  color: #b42318;
+  border: 1px solid #fecdca;
+  border-radius: 4px;
+  padding: 0 6px;
+  font-size: 12px;
+}
+.tag-status {
+  font-style: normal;
+  background: #e7f0fe;
+  color: #1f4e9e;
+  border-radius: 4px;
+  padding: 1px 8px;
+  font-size: 12px;
+}
+.tag-status.tag-low { background: #fee4e2; color: #b42318; border: 1px solid #fecdca; }
+.tag-status.tag-off { background: #1f2937; color: #fff; }
+.stat-warn { color: #b42318; }
+.empty-cell { color: var(--muted); }
+.error-banner {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 12px;
+  background: #fef3f2;
+  border: 1px solid #fecdca;
+  color: #b42318;
+  border-radius: 6px;
+  padding: 8px 12px;
+  margin-bottom: 12px;
+  font-size: 13px;
+}
+.modal-mask {
+  position: fixed;
+  inset: 0;
+  background: rgba(15, 23, 42, 0.45);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 20;
+}
+.modal-card {
+  width: 420px;
+  background: #fff;
+  border-radius: 10px;
+  padding: 18px 20px;
+}
+.modal-card h3 { margin: 0 0 12px; }
+.form-item { display: block; margin-bottom: 10px; }
+.form-item span { display: block; font-size: 12px; color: var(--muted); margin-bottom: 4px; }
+.form-item input { width: 100%; padding: 6px 8px; border: 1px solid var(--border); border-radius: 6px; }
+.required { color: #b42318; margin-left: 2px; font-style: normal; }
+.form-hint { font-size: 12px; color: var(--muted); margin: 4px 0; }
+.modal-actions { display: flex; justify-content: flex-end; gap: 8px; margin-top: 8px; }
+.detail-wrap { display: flex; flex-direction: column; gap: 12px; }
+.detail-head { display: flex; justify-content: space-between; align-items: center; background: #fff; border: 1px solid var(--border); border-radius: 8px; padding: 14px 16px; }
+.detail-head h3 { margin: 0 0 6px; }
+.detail-head p { margin: 0; }
+.detail-actions { gap: 8px; }
+.detail-card { background: #fff; border: 1px solid var(--border); border-radius: 8px; padding: 12px 16px; }
+.detail-card.card-warn { border-color: #fecdca; background: #fffbfa; }
+.detail-card h4 { margin: 0 0 10px; font-size: 14px; }
+.detail-grid { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 8px 24px; margin: 0; }
+.detail-item { display: flex; gap: 8px; font-size: 13px; }
+.detail-item dt { color: var(--muted); width: 110px; flex: none; }
+.detail-item dd { margin: 0; }
+.filter-item select { padding: 5px 8px; border: 1px solid var(--border); border-radius: 6px; }
